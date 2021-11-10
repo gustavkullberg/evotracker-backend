@@ -5,7 +5,8 @@
     "private": true,
     "scripts": {
         "start": "nodemon index.js",
-        "build": "node index.js"
+        "build": "echo 'building ..'",
+        "serve": "node index.js"
     },
     "dependencies": {
         "@types/mongodb": "^3.6.0",
