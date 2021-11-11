@@ -1,11 +1,14 @@
 const { getDb } = require("./db");
-
+const CronJob = require('cron').CronJob;
 
 const cache = { value: null, expiryTimeStamp: null }
 
-const getGameInfosFromDb = async (db) => {
-    return await db.collection("gameInfo").find().toArray();
-}
+const gameInfosJob = new CronJob('*/4 * * * *', async () => {
+    console.log(new Date().toISOString(), "Fetching gameInfos")
+    const db = await getDb();
+    cache.value = await db.collection("gameInfo").find().toArray();
+}, null, true);
+
 
 const getGameInfo = async (game) => {
     const gameInfos = await getGameInfos();
@@ -13,20 +16,7 @@ const getGameInfo = async (game) => {
 }
 
 const getGameInfos = async () => {
-    let arr;
-    if (cache.expiryTimestamp && cache.expiryTimestamp.valueOf() > Date.now()) {
-        arr = cache.value;
-        return arr;
-    };
-    const db = await getDb();
-    arr = await getGameInfosFromDb(db);
-
-    const now = new Date();
-    const expiryTimestamp = new Date(now.getTime() + 1000 * 60 * 5);
-    cache.expiryTimestamp = expiryTimestamp;
-    cache.value = arr;
-
-    return arr;
+    return cache.value
 }
 
-module.exports = { getGameInfos, getGameInfo };
+module.exports = { getGameInfos, getGameInfo, gameInfosJob };

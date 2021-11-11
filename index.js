@@ -1,8 +1,8 @@
 const dotenv = require("dotenv");
 dotenv.config();
 
-const { getMinutesTimeSeries, getDailyTimeSeries } = require("./getTimeSeries")
-const { getGameInfo, getGameInfos } = require("././getGameInfo")
+const { getMinutesTimeSeries, getDailyTimeSeries, minutesTimeSeriesJob, dailyTimeSeriesJob } = require("./getTimeSeries")
+const { getGameInfo, getGameInfos, gameInfosJob } = require("././getGameInfo")
 const express = require('express')
 const app = express()
 
@@ -23,4 +23,8 @@ app.get('/gameInfos/:game', async function (req, res) {
     res.send(await getGameInfo(req.params.game))
 })
 
-app.listen(3000);
+app.listen(3000, "", () => {
+    minutesTimeSeriesJob.start();
+    dailyTimeSeriesJob.start();
+    gameInfosJob.start();
+});
