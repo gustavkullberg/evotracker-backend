@@ -1,1 +1,1 @@
-export const CRON_JOB_INTERVAL_MINUTES = 1;
+export const CRON_JOB_INTERVAL_MINUTES = 4;

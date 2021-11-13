@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { getMinutesTimeSeries, getDailyTimeSeries, minutesTimeSeriesJob, dailyTimeSeriesJob } from "./getTimeSeries";
+import { getMinutesTimeSeries, getDailyTimeSeries, minutesTimeSeriesJob, dailyTimeSeriesJob, getMinutesTimeSeriesForGame } from "./getTimeSeries";
 import { getGameInfo, getGameInfos, gameInfosJob } from "./getGameInfo";
 import express from 'express';
 import { Response } from 'express';
@@ -47,6 +47,19 @@ app.get('/timeSeries/minutes', async function (req, res: Response) {
     const route = req.route.path;
 
     res.send(await getMinutesTimeSeries())
+    const headers = res.getHeaders()
+    const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
+    if (content_length > 0) {
+        httpResponseSize.labels({ route, method: req.method }).observe(content_length);
+    }
+    end({ route, code: res.statusCode, method: req.method });
+})
+
+app.get('/games/:game/timeSeries/minutes', async function (req, res: Response) {
+    const end = httpRequestTimer.startTimer();
+    const route = req.route.path;
+
+    res.send(await getMinutesTimeSeriesForGame(req.params.game))
     const headers = res.getHeaders()
     const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
     if (content_length > 0) {
