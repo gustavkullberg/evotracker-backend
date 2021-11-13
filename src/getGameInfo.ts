@@ -1,12 +1,14 @@
-import { getDb } from "./db";
+import { getDb, mongoQueryTime } from "./db";
 const CronJob = require('cron').CronJob;
 
 const cache = { value: null, expiryTimeStamp: null }
 
 export const gameInfosJob = new CronJob('*/4 * * * *', async () => {
     console.log(new Date().toISOString(), "Fetching gameInfos")
+    const end = mongoQueryTime.startTimer();
     const db = await getDb();
     cache.value = await db.collection("gameInfo").find().toArray();
+    end({ type: "getInfo_find" })
 }, null, true);
 
 
