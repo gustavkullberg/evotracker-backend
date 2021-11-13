@@ -26,8 +26,8 @@ export const dailyTimeSeriesJob = new CronJob(`*/${CRON_JOB_INTERVAL_MINUTES} * 
     end({ type: "dailyHistoryEvoStats_find_sort" })
 }, null, true);
 
-export const getMinutesTimeSeries = async () => {
-    return minutesCache.value;
+export const getMinutesTimeSeries = async (startDate: Date) => {
+    return minutesCache.value?.filter(entry => entry.timeStamp > startDate.toISOString()) || []
 }
 
 export const getMinutesTimeSeriesForGame = async (game: string) => {

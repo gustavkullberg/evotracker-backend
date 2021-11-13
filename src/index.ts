@@ -45,8 +45,8 @@ app.get('/metrics', async function (req, res: Response) {
 app.get('/timeSeries/minutes', async function (req, res: Response) {
     const end = httpRequestTimer.startTimer();
     const route = req.route.path;
-
-    res.send(await getMinutesTimeSeries())
+    const startDate = new Date(req.query.startDate?.toString() || 0);
+    res.send(await getMinutesTimeSeries(startDate))
     const headers = res.getHeaders()
     const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
     if (content_length > 0) {
