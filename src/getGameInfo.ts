@@ -1,9 +1,10 @@
+import { CRON_JOB_INTERVAL_MINUTES } from "./constants";
 import { getDb, mongoQueryTime } from "./db";
 const CronJob = require('cron').CronJob;
 
 const cache = { value: null, expiryTimeStamp: null }
 
-export const gameInfosJob = new CronJob('*/4 * * * *', async () => {
+export const gameInfosJob = new CronJob(`*/${CRON_JOB_INTERVAL_MINUTES} * * * *`, async () => {
     console.log(new Date().toISOString(), "Fetching gameInfos")
     const end = mongoQueryTime.startTimer();
     const db = await getDb();

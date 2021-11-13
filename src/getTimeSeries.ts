@@ -1,3 +1,4 @@
+import { CRON_JOB_INTERVAL_MINUTES } from "./constants";
 import { getDb, mongoQueryTime } from "./db";
 const CronJob = require('cron').CronJob;
 
@@ -7,7 +8,7 @@ const dailyAverageCollection = "dailyHistoryEvoStats"
 const minutesCache = { value: null }
 const dailyCache = { value: null }
 
-export const minutesTimeSeriesJob = new CronJob('*/4 * * * *', async () => {
+export const minutesTimeSeriesJob = new CronJob(`*/${CRON_JOB_INTERVAL_MINUTES} * * * *`, async () => {
     console.log(new Date().toISOString(), "Fetching minutes timeseries")
     const end = mongoQueryTime.startTimer();
     const db = await getDb();
@@ -17,7 +18,7 @@ export const minutesTimeSeriesJob = new CronJob('*/4 * * * *', async () => {
     end({ type: "evostats_find_timestamp_gt_sevendaysago" })
 }, null, true);
 
-export const dailyTimeSeriesJob = new CronJob('*/4 * * * *', async () => {
+export const dailyTimeSeriesJob = new CronJob(`*/${CRON_JOB_INTERVAL_MINUTES} * * * *`, async () => {
     console.log(new Date().toISOString(), "Fetching daily timeseries")
     const end = mongoQueryTime.startTimer();
     const db = await getDb();
