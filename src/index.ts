@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { getMinutesTimeSeries, getDailyTimeSeries, minutesTimeSeriesJob, dailyTimeSeriesJob, getMinutesTimeSeriesForGame } from "./getTimeSeries";
-import { getGameInfo, getGameInfos, gameInfosJob } from "./getGameInfo";
+import { getMinutesTimeSeries, getDailyTimeSeries, minutesTimeSeriesJob, dailyTimeSeriesJob, getMinutesTimeSeriesForGame, queryMinutesTimeSeries, queryDailyTimeSeries } from "./getTimeSeries";
+import { getGameInfo, getGameInfos, gameInfosJob, queryGameInfos } from "./getGameInfo";
 import express from 'express';
 import { Response } from 'express';
 import client from 'prom-client';
@@ -59,7 +59,8 @@ app.get('/games/:game/timeSeries/minutes', async function (req, res: Response) {
     const end = httpRequestTimer.startTimer();
     const route = req.route.path;
 
-    res.send(await getMinutesTimeSeriesForGame(req.params.game))
+    const startDate = new Date(req.query.startDate?.toString() || 0);
+    res.send(await getMinutesTimeSeriesForGame(req.params.game, startDate))
     const headers = res.getHeaders()
     const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
     if (content_length > 0) {
@@ -72,7 +73,8 @@ app.get('/timeSeries/daily', async function (req, res: Response) {
     const end = httpRequestTimer.startTimer();
     const route = req.route.path;
 
-    res.send(await getDailyTimeSeries())
+    const startDate = new Date(req.query.startDate?.toString() || 0);
+    res.send(await getDailyTimeSeries(startDate))
     const headers = res.getHeaders()
     const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
     if (content_length > 0) {
@@ -109,6 +111,10 @@ app.get('/gameInfos/:game', async function (req, res: Response) {
 
 const port = 8080;
 app.listen(port, "", () => {
+    queryGameInfos();
+    queryMinutesTimeSeries();
+    queryDailyTimeSeries();
+
     minutesTimeSeriesJob.start();
     dailyTimeSeriesJob.start();
     gameInfosJob.start();
