@@ -7,6 +7,8 @@ import express from 'express';
 import { Response } from 'express';
 import client from 'prom-client';
 import { mongoQueryTime } from "./db";
+import { getStats } from "./getStats";
+import { getStatsForGame } from "./getStatsById";
 const app = express()
 
 const httpRequestTimer = new client.Histogram({
@@ -42,6 +44,18 @@ app.get('/metrics', async function (req, res: Response) {
     res.send(await register.metrics());
 })
 
+app.get('/stats', async function (req, res: Response) {
+    const end = httpRequestTimer.startTimer();
+    const route = req.route.path;
+    res.send(await getStats())
+    const headers = res.getHeaders()
+    const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
+    if (content_length > 0) {
+        httpResponseSize.labels({ route, method: req.method }).observe(content_length);
+    }
+    end({ route, code: res.statusCode, method: req.method });
+})
+
 app.get('/timeSeries/minutes', async function (req, res: Response) {
     const end = httpRequestTimer.startTimer();
     const route = req.route.path;
@@ -61,6 +75,19 @@ app.get('/games/:game/timeSeries/minutes', async function (req, res: Response) {
 
     const startDate = new Date(req.query.startDate?.toString() || 0);
     res.send(await getMinutesTimeSeriesForGame(req.params.game, startDate))
+    const headers = res.getHeaders()
+    const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
+    if (content_length > 0) {
+        httpResponseSize.labels({ route, method: req.method }).observe(content_length);
+    }
+    end({ route, code: res.statusCode, method: req.method });
+})
+
+app.get('/games/:game/stats', async function (req, res: Response) {
+    const end = httpRequestTimer.startTimer();
+    const route = req.route.path;
+
+    res.send(await getStatsForGame(req.params.game))
     const headers = res.getHeaders()
     const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
     if (content_length > 0) {

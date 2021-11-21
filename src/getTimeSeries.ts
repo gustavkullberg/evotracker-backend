@@ -1,5 +1,11 @@
 import { CRON_JOB_INTERVAL_MINUTES } from "./constants";
 import { getDb, mongoQueryTime } from "./db";
+
+type Entry = {
+    timeStamp: Date,
+    value: number
+}
+
 const CronJob = require('cron').CronJob;
 
 const minutesCollection = 'evostats';
@@ -38,7 +44,7 @@ export const getMinutesTimeSeries = async (startDate: Date) => {
     return minutesCache.value?.filter(entry => entry.timeStamp > startDate.toISOString()) || []
 }
 
-export const getMinutesTimeSeriesForGame = async (game: string, startDate: Date) => {
+export const getMinutesTimeSeriesForGame = async (game: string, startDate: Date): Promise<Entry[]> => {
     return minutesCache.value
         ?.map(a => ({ timeStamp: a.timeStamp, value: a.entry[game] }))
         ?.filter(entry => entry.timeStamp > startDate.toISOString()) || []
