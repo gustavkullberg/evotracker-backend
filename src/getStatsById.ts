@@ -2,11 +2,13 @@ import { getGameInfo } from "./getGameInfo"
 import { getDailyTimeSeries, getMinutesTimeSeries, getMinutesTimeSeriesForGame } from "./getTimeSeries"
 import { calculateMovingAverage } from "./services/calculateMovingAverage";
 
-const getDaysOfTheWeekStats = async (game: string, ts) => {
+const getDaysOfTheXStats = async (game: string, ts, isDays: boolean) => {
     const entries = ts.map(t => ({ timeStamp: t.date, value: t.dailyAverages[game] })).filter(t => t.value);
+    const entryByDate = entries.reduce((acc, obj) => {
+        const day = isDays ?
+            new Date(obj.timeStamp).getDay() :
+            new Date(obj.timeStamp).getDate();
 
-    const entryByDay = entries.reduce((acc, obj) => {
-        const day = new Date(obj.timeStamp).getDay();
         if (acc[day]) {
             acc[day].push(obj)
         } else {
@@ -15,12 +17,12 @@ const getDaysOfTheWeekStats = async (game: string, ts) => {
         return acc;
     }, {});
 
-    return Object.keys(entryByDay).map(day => {
-        const res = calculateMovingAverage(entryByDay[day].map(e => e.value), 26)
+    return Object.keys(entryByDate).map(day => {
+        const res = calculateMovingAverage(entryByDate[day].map(e => e.value), 26)
         return { value: res[res.length - 1], day }
-
     });
 }
+
 const getAverageForGame = (timeSeries, game, timeSpan) => {
     const tsGame = timeSeries.map(t => t.dailyAverages[game]);
     const average = calculateMovingAverage(tsGame, timeSpan);
@@ -44,7 +46,8 @@ export const getStatsForGame = async (game) => {
     const gameInfo = await getGameInfo(game);
     const ath = gameInfo ? gameInfo.ath : 0;
 
-    const dotWStats = await getDaysOfTheWeekStats(game, ts);
+    const dotWStats = await getDaysOfTheXStats(game, ts, true);
+    const dotMStats = await getDaysOfTheXStats(game, ts, false);
 
     const timeSeries = await getMinutesTimeSeries(new Date(0));
     const latestTimeSeries = timeSeries[timeSeries.length - 1];
@@ -59,6 +62,7 @@ export const getStatsForGame = async (game) => {
         ath,
         dotWStats,
         livePlayers,
-        rank
+        rank,
+        dotMStats
     }
 }
