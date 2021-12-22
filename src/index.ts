@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { getMinutesTimeSeries, getDailyTimeSeries, minutesTimeSeriesJob, dailyTimeSeriesJob, getMinutesTimeSeriesForGame, queryMinutesTimeSeries, queryDailyTimeSeries } from "./getTimeSeries";
+import { getMinutesTimeSeries, getDailyTimeSeries, minutesTimeSeriesJob, dailyTimeSeriesJob, getMinutesTimeSeriesForGame, queryMinutesTimeSeries, queryDailyTimeSeries, getMonthlyTimeSeries } from "./getTimeSeries";
 import { getGameInfo, getGameInfos, gameInfosJob, queryGameInfos } from "./getGameInfo";
 import express from 'express';
 import { Response } from 'express';
@@ -9,6 +9,7 @@ import client from 'prom-client';
 import { mongoQueryTime } from "./db";
 import { getStats } from "./getStats";
 import { getStatsForGame } from "./getStatsById";
+import { athEventsJob, getAthEvents, queryAthEvents } from "./getAthEvents";
 const app = express()
 
 const httpRequestTimer = new client.Histogram({
@@ -110,6 +111,20 @@ app.get('/timeSeries/daily', async function (req, res: Response) {
     end({ route, code: res.statusCode, method: req.method });
 })
 
+app.get('/timeSeries/monthly', async function (req, res: Response) {
+    const end = httpRequestTimer.startTimer();
+    const route = req.route.path;
+
+    const startDate = new Date(req.query.startDate?.toString() || 0);
+    res.send(await getMonthlyTimeSeries(startDate))
+    const headers = res.getHeaders()
+    const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
+    if (content_length > 0) {
+        httpResponseSize.labels({ route, method: req.method }).observe(content_length);
+    }
+    end({ route, code: res.statusCode, method: req.method });
+})
+
 app.get('/gameInfos', async function (req, res: Response) {
     const end = httpRequestTimer.startTimer();
     const route = req.route.path;
@@ -136,8 +151,22 @@ app.get('/gameInfos/:game', async function (req, res: Response) {
     end({ route, code: res.statusCode, method: req.method });
 })
 
+app.get('/events/allTimeHighs', async function (req, res: Response) {
+    const end = httpRequestTimer.startTimer();
+    const route = req.route.path;
+
+    res.send(await getAthEvents());
+    const headers = res.getHeaders()
+    const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
+    if (content_length > 0) {
+        httpResponseSize.labels({ route, method: req.method }).observe(content_length);
+    }
+    end({ route, code: res.statusCode, method: req.method });
+})
+
 const port = 8080;
 app.listen(port, "", () => {
+    queryAthEvents();
     queryGameInfos();
     queryMinutesTimeSeries();
     queryDailyTimeSeries();
@@ -145,6 +174,7 @@ app.listen(port, "", () => {
     minutesTimeSeriesJob.start();
     dailyTimeSeriesJob.start();
     gameInfosJob.start();
+    athEventsJob.start();
 
     console.log(`Started serving on port ${port} :) `)
 });

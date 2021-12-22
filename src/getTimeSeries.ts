@@ -1,5 +1,6 @@
 import { CRON_JOB_INTERVAL_MINUTES } from "./constants";
 import { getDb, mongoQueryTime } from "./db";
+import { groupBy } from "./services/groupBy";
 
 type Entry = {
     timeStamp: Date,
@@ -12,7 +13,7 @@ const minutesCollection = 'evostats';
 const dailyAverageCollection = "dailyHistoryEvoStats"
 
 const minutesCache = { value: null as any[] }
-const dailyCache = { value: null }
+const dailyCache = { value: null as any[] }
 
 export const queryDailyTimeSeries = async () => {
     const end = mongoQueryTime.startTimer();
@@ -53,4 +54,25 @@ export const getMinutesTimeSeriesForGame = async (game: string, startDate: Date)
 export const getDailyTimeSeries = async (startDate: Date) => {
     const res = dailyCache.value?.filter(entry => entry.date > startDate.toISOString()) || []
     return res;
+}
+
+export const getMonthlyTimeSeries = async (startDate: Date) => {
+    const monthlyGroups = groupBy(dailyCache.value, x => x.date.substring(0, 7))
+
+    const result = [];
+    monthlyGroups.forEach((month, idx) => {
+        const averages = month.reduce((tot, obj) => {
+            Object.keys(obj.dailyAverages).forEach(key => {
+                if (tot[key]) {
+                    tot[key] += obj.dailyAverages[key] / month.length
+                } else {
+                    tot[key] = obj.dailyAverages[key] / month.length
+                }
+            })
+            return tot;
+        }, {})
+
+        result.push({ date: idx, averages })
+    });
+    return result;
 }
