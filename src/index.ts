@@ -15,7 +15,7 @@ const app = express()
 const httpRequestTimer = new client.Histogram({
     name: 'http_request_duration_seconds',
     help: 'Duration of HTTP requests in seconds',
-    labelNames: ['method', 'route', 'code'],
+    labelNames: ['method', 'route', 'code', "game"],
     buckets: [0.1, 0.3, 0.5, 0.7, 1, 3, 5, 7, 10]
 });
 
@@ -94,7 +94,7 @@ app.get('/games/:game/stats', async function (req, res: Response) {
     if (content_length > 0) {
         httpResponseSize.labels({ route, method: req.method }).observe(content_length);
     }
-    end({ route, code: res.statusCode, method: req.method });
+    end({ route, code: res.statusCode, method: req.method, game: req.params.game });
 })
 
 app.get('/timeSeries/daily', async function (req, res: Response) {
@@ -117,32 +117,6 @@ app.get('/timeSeries/monthly', async function (req, res: Response) {
 
     const startDate = new Date(req.query.startDate?.toString() || 0);
     res.send(await getMonthlyTimeSeries(startDate))
-    const headers = res.getHeaders()
-    const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
-    if (content_length > 0) {
-        httpResponseSize.labels({ route, method: req.method }).observe(content_length);
-    }
-    end({ route, code: res.statusCode, method: req.method });
-})
-
-app.get('/gameInfos', async function (req, res: Response) {
-    const end = httpRequestTimer.startTimer();
-    const route = req.route.path;
-    res.send(await getGameInfos())
-
-    const headers = res.getHeaders()
-    const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
-    if (content_length > 0) {
-        httpResponseSize.labels({ route, method: req.method }).observe(content_length);
-    }
-    end({ route, code: res.statusCode, method: req.method });
-})
-
-app.get('/gameInfos/:game', async function (req, res: Response) {
-    const end = httpRequestTimer.startTimer();
-    const route = req.route.path;
-
-    res.send(await getGameInfo(req.params.game))
     const headers = res.getHeaders()
     const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
     if (content_length > 0) {
