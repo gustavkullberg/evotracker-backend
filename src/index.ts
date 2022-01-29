@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { getMinutesTimeSeries, getDailyTimeSeries, minutesTimeSeriesJob, dailyTimeSeriesJob, getMinutesTimeSeriesForGame, queryMinutesTimeSeries, queryDailyTimeSeries, getMonthlyTimeSeries, getDailyTimeSeriesForGame, getMonthlyTimeSeriesForGame } from "./getTimeSeries";
+import { minutesTimeSeriesJob, dailyTimeSeriesJob, getMinutesTimeSeriesForGame, queryMinutesTimeSeries, queryDailyTimeSeries, getDailyTimeSeriesForGame, getMonthlyTimeSeriesForGame } from "./getTimeSeries";
 import { gameInfosJob, queryGameInfos } from "./getGameInfo";
 import express from 'express';
 import { Response } from 'express';
@@ -49,19 +49,6 @@ app.get('/stats', async function (req, res: Response) {
     const end = httpRequestTimer.startTimer();
     const route = req.route.path;
     res.send(await getStats())
-    const headers = res.getHeaders()
-    const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
-    if (content_length > 0) {
-        httpResponseSize.labels({ route, method: req.method }).observe(content_length);
-    }
-    end({ route, code: res.statusCode, method: req.method });
-})
-
-app.get('/timeSeries/minutes', async function (req, res: Response) {
-    const end = httpRequestTimer.startTimer();
-    const route = req.route.path;
-    const startDate = new Date(req.query.startDate?.toString() || 0);
-    res.send(await getMinutesTimeSeries(startDate))
     const headers = res.getHeaders()
     const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
     if (content_length > 0) {
@@ -123,34 +110,6 @@ app.get('/games/:game/stats', async function (req, res: Response) {
         httpResponseSize.labels({ route, method: req.method }).observe(content_length);
     }
     end({ route, code: res.statusCode, method: req.method, game: req.params.game });
-})
-
-app.get('/timeSeries/daily', async function (req, res: Response) {
-    const end = httpRequestTimer.startTimer();
-    const route = req.route.path;
-
-    const startDate = new Date(req.query.startDate?.toString() || 0);
-    res.send(await getDailyTimeSeries(startDate))
-    const headers = res.getHeaders()
-    const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
-    if (content_length > 0) {
-        httpResponseSize.labels({ route, method: req.method }).observe(content_length);
-    }
-    end({ route, code: res.statusCode, method: req.method });
-})
-
-app.get('/timeSeries/monthly', async function (req, res: Response) {
-    const end = httpRequestTimer.startTimer();
-    const route = req.route.path;
-
-    const startDate = new Date(req.query.startDate?.toString() || 0);
-    res.send(await getMonthlyTimeSeries(startDate))
-    const headers = res.getHeaders()
-    const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
-    if (content_length > 0) {
-        httpResponseSize.labels({ route, method: req.method }).observe(content_length);
-    }
-    end({ route, code: res.statusCode, method: req.method });
 })
 
 app.get('/events/allTimeHighs', async function (req, res: Response) {
