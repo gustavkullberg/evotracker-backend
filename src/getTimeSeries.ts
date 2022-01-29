@@ -47,7 +47,7 @@ export const getMinutesTimeSeries = async (startDate: Date) => {
 
 export const getMinutesTimeSeriesForGame = async (game: string, startDate: Date): Promise<Entry[]> => {
     return minutesCache.value
-        ?.map(a => ({ timeStamp: a.timeStamp, value: a.entry[game] }))
+        ?.map(a => ({ timeStamp: a.timeStamp, value: a?.entry[game] }))
         ?.filter(entry => entry.timeStamp > startDate.toISOString()) || []
 }
 
@@ -57,8 +57,12 @@ export const getDailyTimeSeries = async (startDate: Date) => {
 }
 
 export const getDailyTimeSeriesForGame = async (game: string, startDate: Date) => {
-    const res = dailyCache.value?.filter(entry => entry.date > startDate.toISOString()) || []
-    return res?.map(a => ({ timeStamp: a.date, average: a.dailyAverages[game], max: a.dailyMaxes[game] }))
+    const res = dailyCache.value
+        ?.filter(entry => entry.date > startDate.toISOString())
+        ?.map(a => ({ timeStamp: a.date, average: a.dailyAverages[game], max: a.dailyMaxes[game] }))
+        .filter(x => !!x.average)
+    res.shift();
+    return res;
 }
 
 export const getMonthlyTimeSeriesForGame = async (game: string, startDate: Date) => {
