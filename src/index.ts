@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { getMinutesTimeSeries, getDailyTimeSeries, minutesTimeSeriesJob, dailyTimeSeriesJob, getMinutesTimeSeriesForGame, queryMinutesTimeSeries, queryDailyTimeSeries, getMonthlyTimeSeries } from "./getTimeSeries";
-import { getGameInfo, getGameInfos, gameInfosJob, queryGameInfos } from "./getGameInfo";
+import { getMinutesTimeSeries, getDailyTimeSeries, minutesTimeSeriesJob, dailyTimeSeriesJob, getMinutesTimeSeriesForGame, queryMinutesTimeSeries, queryDailyTimeSeries, getMonthlyTimeSeries, getDailyTimeSeriesForGame, getMonthlyTimeSeriesForGame } from "./getTimeSeries";
+import { gameInfosJob, queryGameInfos } from "./getGameInfo";
 import express from 'express';
 import { Response } from 'express';
 import client from 'prom-client';
@@ -76,6 +76,34 @@ app.get('/games/:game/timeSeries/minutes', async function (req, res: Response) {
 
     const startDate = new Date(req.query.startDate?.toString() || 0);
     res.send(await getMinutesTimeSeriesForGame(req.params.game, startDate))
+    const headers = res.getHeaders()
+    const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
+    if (content_length > 0) {
+        httpResponseSize.labels({ route, method: req.method }).observe(content_length);
+    }
+    end({ route, code: res.statusCode, method: req.method });
+})
+
+app.get('/games/:game/timeSeries/daily', async function (req, res: Response) {
+    const end = httpRequestTimer.startTimer();
+    const route = req.route.path;
+
+    const startDate = new Date(req.query.startDate?.toString() || 0);
+    res.send(await getDailyTimeSeriesForGame(req.params.game, startDate))
+    const headers = res.getHeaders()
+    const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
+    if (content_length > 0) {
+        httpResponseSize.labels({ route, method: req.method }).observe(content_length);
+    }
+    end({ route, code: res.statusCode, method: req.method });
+})
+
+app.get('/games/:game/timeSeries/monthly', async function (req, res: Response) {
+    const end = httpRequestTimer.startTimer();
+    const route = req.route.path;
+
+    const startDate = new Date(req.query.startDate?.toString() || 0);
+    res.send(await getMonthlyTimeSeriesForGame(req.params.game, startDate))
     const headers = res.getHeaders()
     const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
     if (content_length > 0) {

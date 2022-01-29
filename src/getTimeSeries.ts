@@ -56,6 +56,16 @@ export const getDailyTimeSeries = async (startDate: Date) => {
     return res;
 }
 
+export const getDailyTimeSeriesForGame = async (game: string, startDate: Date) => {
+    const res = dailyCache.value?.filter(entry => entry.date > startDate.toISOString()) || []
+    return res?.map(a => ({ timeStamp: a.date, average: a.dailyAverages[game], max: a.dailyMaxes[game] }))
+}
+
+export const getMonthlyTimeSeriesForGame = async (game: string, startDate: Date) => {
+    const res = await getMonthlyTimeSeries(startDate);
+    return res.map(r => ({ timeStamp: r.date, value: r.averages[game] }));
+}
+
 export const getMonthlyTimeSeries = async (startDate: Date) => {
     const monthlyGroups = groupBy(dailyCache.value, x => x.date.substring(0, 7))
 
