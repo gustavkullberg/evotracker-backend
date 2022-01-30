@@ -18,5 +18,5 @@ export const athEventsJob = new CronJob(`*/${CRON_JOB_INTERVAL_MINUTES} * * * *`
 
 
 export const getAthEvents = async () => {
-    return cache.value
+    return cache.value?.slice(0, 100);
 }
