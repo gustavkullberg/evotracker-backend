@@ -29,7 +29,6 @@ const getHighestRelative = (timeSeries, timeSpan) => {
     })
         .filter(g => g)
         .filter(a => a.value)
-        .filter(g => g.game != "All Shows")
         .sort((lhs, rhs) => rhs.value > lhs.value ? 1 : -1)
 }
 
@@ -43,13 +42,11 @@ export const getStats = async () => {
     const latest = minutesTimeSeries[minutesTimeSeries.length - 1]
     const topLive = latest ? Object.keys(latest.entry)
         .map(l => ({ game: l, value: latest.entry[l] }))
-        .filter(g => g.game != "All Shows")
         .sort((lhs, rhs) => rhs.value > lhs.value ? 1 : -1) : []
 
     const gameInfos = await getGameInfos();
     const athList = gameInfos ? gameInfos
         .map(g => ({ game: g.game, timeStamp: g.ath.timeStamp, value: g.ath.value }))
-        .filter(g => g.game != "All Shows")
         .sort((lhs, rhs) => rhs.value > lhs.value ? 1 : -1)
         : []
 
