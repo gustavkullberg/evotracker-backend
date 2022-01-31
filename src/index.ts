@@ -68,7 +68,7 @@ app.get('/games/:game/timeSeries/minutes', async function (req, res: Response) {
     if (content_length > 0) {
         httpResponseSize.labels({ route, method: req.method }).observe(content_length);
     }
-    end({ route, code: res.statusCode, method: req.method });
+    end({ route, code: res.statusCode, method: req.method, game: req.params.game });
 })
 
 app.get('/games/:game/timeSeries/daily', async function (req, res: Response) {
@@ -82,7 +82,7 @@ app.get('/games/:game/timeSeries/daily', async function (req, res: Response) {
     if (content_length > 0) {
         httpResponseSize.labels({ route, method: req.method }).observe(content_length);
     }
-    end({ route, code: res.statusCode, method: req.method });
+    end({ route, code: res.statusCode, method: req.method, game: req.params.game });
 })
 
 app.get('/games/:game/timeSeries/monthly', async function (req, res: Response) {
@@ -96,7 +96,7 @@ app.get('/games/:game/timeSeries/monthly', async function (req, res: Response) {
     if (content_length > 0) {
         httpResponseSize.labels({ route, method: req.method }).observe(content_length);
     }
-    end({ route, code: res.statusCode, method: req.method });
+    end({ route, code: res.statusCode, method: req.method, game: req.params.game });
 })
 
 app.get('/games/:game/stats', async function (req, res: Response) {

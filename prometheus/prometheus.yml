@@ -4,4 +4,4 @@ scrape_configs:
   - job_name: "evotracker-backend-app"
     scheme: https
     static_configs:
-      - targets: [""]
+      - targets: ["evotracker-backend-lb5o8.ondigitalocean.app:443"]
