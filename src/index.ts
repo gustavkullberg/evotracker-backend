@@ -10,6 +10,7 @@ import { mongoQueryTime } from "./db";
 import { getStats } from "./getStats";
 import { getStatsForGame } from "./getStatsById";
 import { athEventsJob, getAthEvents, queryAthEvents } from "./getAthEvents";
+import { handle } from "./entryInsertedEventHandler";
 const app = express()
 
 const httpRequestTimer = new client.Histogram({
@@ -122,6 +123,15 @@ app.get('/events/allTimeHighs', async function (req, res: Response) {
     if (content_length > 0) {
         httpResponseSize.labels({ route, method: req.method }).observe(content_length);
     }
+    end({ route, code: res.statusCode, method: req.method });
+})
+
+app.post('/events/sns', async function (req, res: Response) {
+    const end = httpRequestTimer.startTimer();
+    const route = req.route.path;
+    const messageType = req.headers["x-amz-sns-message-type"];
+    res.send(await handle(messageType, req.body));
+    httpResponseSize.labels({ route, method: req.method })
     end({ route, code: res.statusCode, method: req.method });
 })
 
