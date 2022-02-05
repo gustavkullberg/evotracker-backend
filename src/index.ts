@@ -12,6 +12,8 @@ import { getStatsForGame } from "./getStatsById";
 import { athEventsJob, getAthEvents, queryAthEvents } from "./getAthEvents";
 import { handle } from "./entryInsertedEventHandler";
 const app = express()
+app.use(express.json());
+
 
 const httpRequestTimer = new client.Histogram({
     name: 'http_request_duration_seconds',
@@ -129,7 +131,6 @@ app.get('/events/allTimeHighs', async function (req, res: Response) {
 app.post('/events/sns', async function (req, res: Response) {
     const end = httpRequestTimer.startTimer();
     const route = req.route.path;
-    console.log(req);
     const messageType = req.headers["x-amz-sns-message-type"];
     res.send(await handle(messageType, req.body));
     httpResponseSize.labels({ route, method: req.method })
