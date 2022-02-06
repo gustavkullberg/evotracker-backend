@@ -1,15 +1,15 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { minutesTimeSeriesJob, dailyTimeSeriesJob, getMinutesTimeSeriesForGame, queryMinutesTimeSeries, queryDailyTimeSeries, getDailyTimeSeriesForGame, getMonthlyTimeSeriesForGame } from "./getTimeSeries";
-import { gameInfosJob, queryGameInfos } from "./getGameInfo";
+import { getMinutesTimeSeriesForGame, queryMinutesTimeSeries, queryDailyTimeSeries, getDailyTimeSeriesForGame, getMonthlyTimeSeriesForGame } from "./getTimeSeries";
+import { queryGameInfos } from "./getGameInfo";
 import express from 'express';
 import { Response } from 'express';
 import client from 'prom-client';
 import { mongoQueryTime } from "./db";
 import { getStats } from "./getStats";
 import { getStatsForGame } from "./getStatsById";
-import { athEventsJob, getAthEvents, queryAthEvents } from "./getAthEvents";
+import { getAthEvents, queryAthEvents } from "./getAthEvents";
 import { handle } from "./entryInsertedEventHandler";
 const app = express()
 
@@ -143,11 +143,6 @@ app.listen(port, "", () => {
     queryGameInfos();
     queryMinutesTimeSeries();
     queryDailyTimeSeries();
-
-    minutesTimeSeriesJob.start();
-    dailyTimeSeriesJob.start();
-    gameInfosJob.start();
-    athEventsJob.start();
 
     console.log(`Started serving on port ${port} :) `)
 });

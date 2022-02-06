@@ -1,4 +1,7 @@
 import axios from "axios";
+import { queryAthEvents } from "./getAthEvents";
+import { queryGameInfos } from "./getGameInfo";
+import { queryMinutesTimeSeries, queryDailyTimeSeries } from "./getTimeSeries";
 
 export const handle = async (messageType, message) => {
     if (messageType === "SubscriptionConfirmation") {
@@ -12,7 +15,10 @@ export const handle = async (messageType, message) => {
         return;
     }
     if (messageType === "Notification") {
-        console.log("notification", message);
+        queryAthEvents();
+        queryGameInfos();
+        queryMinutesTimeSeries();
+        queryDailyTimeSeries();
         return;
     }
     console.log("No match for messagetype")
