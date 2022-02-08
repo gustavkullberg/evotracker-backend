@@ -11,6 +11,7 @@ import { getStats } from "./getStats";
 import { getStatsForGame } from "./getStatsById";
 import { getAthEvents, queryAthEvents } from "./getAthEvents";
 import { handle } from "./entryInsertedEventHandler";
+import { getProviderStats, queryPlayTech, queryPragmatic } from "./providers/getProviderStats";
 const app = express()
 
 
@@ -114,6 +115,19 @@ app.get('/games/:game/stats', async function (req, res: Response) {
     end({ route, code: res.statusCode, method: req.method, game: req.params.game });
 })
 
+app.get('/providers/stats', async function (req, res: Response) {
+    const end = httpRequestTimer.startTimer();
+    const route = req.route.path;
+
+    res.send(await getProviderStats())
+    const headers = res.getHeaders()
+    const content_length = headers["content-length"]?.toString() ? parseInt(headers["content-length"].toString()) : 0;
+    if (content_length > 0) {
+        httpResponseSize.labels({ route, method: req.method }).observe(content_length);
+    }
+    end({ route, code: res.statusCode, method: req.method });
+})
+
 app.get('/events/allTimeHighs', async function (req, res: Response) {
     const end = httpRequestTimer.startTimer();
     const route = req.route.path;
@@ -143,6 +157,8 @@ app.listen(port, "", () => {
     queryGameInfos();
     queryMinutesTimeSeries();
     queryDailyTimeSeries();
+    queryPragmatic();
+    queryPlayTech();
 
     console.log(`Started serving on port ${port} :) `)
 });
