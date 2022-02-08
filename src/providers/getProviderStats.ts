@@ -1,6 +1,13 @@
 import { getDb, mongoQueryTime } from "../db";
 import { minutesCache } from "../getTimeSeries";
 
+type ProviderStatistic = {
+    name: string,
+    numberOfGames: number,
+    numberOfPlayers: number,
+    shareOfPlayers: number,
+}
+
 const pragmatic = { value: null };
 const playtech = { value: null };
 
@@ -36,21 +43,9 @@ export const getProviderStats = () => {
 
     const totalNofPlayers = playtechNofPlayers + pragmaticNofPlayers + evolotionNofPlayers;
 
-    return {
-        pragmatic: {
-            numberOfGames: pragmaticNofGames,
-            totalPlayers: pragmaticNofPlayers,
-            share: pragmaticNofPlayers / totalNofPlayers
-        },
-        playtech: {
-            numberOfGames: playtechNofGames,
-            totalPlayers: playtechNofPlayers,
-            share: playtechNofPlayers / totalNofPlayers
-        },
-        evolution: {
-            numberOfGames: evoloutionNofGames,
-            totalPlayers: evolotionNofPlayers,
-            share: evolotionNofPlayers / totalNofPlayers
-        }
-    }
+    const statistics: ProviderStatistic[] = [];
+    statistics.push({ name: "playtech", numberOfGames: playtechNofGames, numberOfPlayers: playtechNofPlayers, shareOfPlayers: playtechNofPlayers / totalNofPlayers });
+    statistics.push({ name: "pragmatic", numberOfGames: pragmaticNofGames, numberOfPlayers: pragmaticNofPlayers, shareOfPlayers: pragmaticNofPlayers / totalNofPlayers });
+    statistics.push({ name: "evolution", numberOfGames: evoloutionNofGames, numberOfPlayers: evolotionNofPlayers, shareOfPlayers: evolotionNofPlayers / totalNofPlayers });
+    return statistics;
 }
